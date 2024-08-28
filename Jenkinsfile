@@ -36,7 +36,7 @@ pipeline {
         stage('Ejecutar SOAPUI') {
             steps {
                 script {
-                    def soapUICommand = '/opt/soapui/bin/testrunner.sh -r -j -d"/opt/soapui/reports" /shared/test-soapui-project.xml'
+                    def soapUICommand = '/opt/soapui/bin/testrunner.sh -r -j -d"/opt/soapui/reports" /shared/soapui-evaluacion-final.xml'
                     sh soapUICommand
                 }
             }
