@@ -2,15 +2,14 @@ pipeline {
     agent any
 
     stages {
-        stage('Clonar repositorio') {
+        stage('Clonar ppastene/td-unit-tests') {
             steps {
                 script {
                     try {
-                        // Intentar clonar el repositorio
+                        // Clonar el repositorio de pruebas unitarias
                         sh 'git clone https://github.com/ppastene/td-unit-tests.git'
                     } catch (Exception e) {
-                        // Si la carpeta ya existe, se captura la excepción y se continua
-                        echo "El repositorio ya existe, omitiendo el clonación."
+                        echo "Uno o ambos repositorios ya existen, omitiendo la clonación."
                     }
                 }
             }
@@ -22,19 +21,23 @@ pipeline {
                 }
             }
         }
-        stage('Ejecutar SoapUI') {
+        stage('Verificar archivos en shared') {
             steps {
-                script {
-                    def soapUICommand = '/opt/soapui/bin/testrunner.sh -r -j -d"/opt/soapui/reports" /shared/soapui-evaluacion-final.xml'
-                    sh soapUICommand
-                }
+                sh 'ls -la /shared'
             }
         }
         stage('Ejecutar JMeter') {
             steps {
                 script {
-                    // Ejecutar el script de JMeter ubicado en la carpeta shared
                     sh '/opt/jmeter/bin/jmeter -n -t /shared/clase4_m4.jmx -l /shared/results.jtl'
+                }
+            }
+        }
+        stage('Ejecutar SOAPUI') {
+            steps {
+                script {
+                    def soapUICommand = '/opt/soapui/bin/testrunner.sh -r -j -d"/opt/soapui/reports" /shared/test-soapui-project.xml'
+                    sh soapUICommand
                 }
             }
         }
@@ -42,7 +45,6 @@ pipeline {
 
     post {
         always {
-            // Archiva los informes generados por JMeter y SoapUI
             archiveArtifacts artifacts: '**/shared/results.jtl', allowEmptyArchive: true
             archiveArtifacts artifacts: '**/opt/soapui/reports/*.xml', allowEmptyArchive: true
         }
